@@ -25,7 +25,7 @@ docker run -d --name appdaemon -p 80:5050 kurapov/alpine-appdaemon
 
 ### Configuration
 
-It's recommended to map a directory into the container to configure home assistant.
+It's recommended to map a directory into the container to configure Appdaemon.
 
 ```
 -v /var/opt/docker/appdaemon:/conf \
@@ -38,10 +38,6 @@ docker run -it --user 1000 --rm -v /var/opt/docker/appdaemon:/conf kurapov/alpin
 ```
 
 Of course you need to have a local user with uid 1000.
-
-### Plugins
-
-Please check the [Dockerfile template](Dockerfile.template) for the list on dependencies embedded. Any other will be downloaded automatically by Home Assistant.
 
 ## License
 This project is licensed under `Apache License v2.0`.
