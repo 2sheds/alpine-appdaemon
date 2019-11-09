@@ -4,15 +4,16 @@ LABEL Description="Appdaemon"
 
 ARG UID=1000
 ARG GUID=1000
+ARG PACKAGES="py3-feedparser py3-multidict py3-idna-ssl py3-async-timeout"
 ARG DEPS=""
 ARG VERSION=__PKG_VER__
-ARG PLUGINS="pysnmp|PyYAML"
+ARG PLUGINS="pysnmp|pyyaml==5.1|astral|pytz|requests>=2.6.0|websocket-client|Jinja2==2.10.1|voluptuous|iso8601|bcrypt|paho-mqtt"
 
 ENV WHEELS_LINKS=https://wheels.home-assistant.io/alpine-__ALPINE_VER__/__BUILD_ARCH__/
 
 __CROSS_COPY qemu-__QEMU_ARCH__-static /usr/bin/
 
-RUN apk add --no-cache git python3 ca-certificates curl iputils py3-cffi tini ${PACKAGES} && \
+RUN apk add --no-cache python3 ca-certificates curl iputils tini ${PACKAGES} && \
     apk add --no-cache --virtual=build-dependencies python3-dev build-base libffi-dev ${DEPS} && \
     addgroup -g ${GUID} appdaemon && \
     adduser -D -G appdaemon -s /bin/sh -u ${UID} appdaemon && \
