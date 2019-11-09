@@ -2,7 +2,7 @@
 
 ## Description
 
-[![Appdaemon version](https://img.shields.io/github/v/tag/2sheds/alpine-appdaemon?label=appdaemon&logo=python&logoColor=white)](https://github.com/home-assistant/appdaemon)
+[![Appdaemon version](https://img.shields.io/github/v/tag/2sheds/alpine-appdaemon?label=appdaemon&logo=python&logoColor=white)](https://github.com/home-assistant/appdaemon/releases)
 [![Docker cloud build](https://img.shields.io/docker/cloud/build/kurapov/alpine-appdaemon?logo=docker&logoColor=white)](https://hub.docker.com/r/kurapov/alpine-appdaemon/builds)
 [![Docker image pulls](https://img.shields.io/docker/pulls/kurapov/alpine-appdaemon?logo=docker&logoColor=white)](https://hub.docker.com/r/kurapov/alpine-appdaemon)
 
