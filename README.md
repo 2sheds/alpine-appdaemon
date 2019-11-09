@@ -12,14 +12,14 @@ This image should be available (unless automated build failed) for the following
  * armhf
  * arm64
 
-I'm using a proper manifest so you can use the main tags ("latest" and version-based "X.X.X") directly (no need for amd64-X.X.X).
+I'm using a proper manifest so you can use the main tags ("latest" and version-based "X.X" or "X.X.X") directly (no need for amd64-X.X.X).
 
 If you want to learn more about multi-architecture docker images, please read [this blog post](https://blog.slucas.fr/series/multi-architecture-docker-image/)
 
 ## Usage
 
 ```
-docker run -d --name appdaemon -p 80:5050 kurapov/alpine-appdaemon:latest
+docker run -d --name appdaemon -p 80:5050 kurapov/alpine-appdaemon
 ```
 
 ### Configuration
