@@ -1,0 +1,30 @@
+FROM __BASEIMAGE_ARCH__/alpine:__ALPINE_VER__
+MAINTAINER Oleg Kurapov <oleg@kurapov.com>
+LABEL Description="Appdaemon"
+
+ARG UID=1000
+ARG GUID=1000
+ARG DEPS=""
+ARG VERSION=__MAIN_VER__
+ARG PLUGINS="pysnmp|PyYAML"
+
+ENV WHEELS_LINKS=https://wheels.home-assistant.io/alpine-__ALPINE_VER__/__BUILD_ARCH__/
+
+__CROSS_COPY qemu-__QEMU_ARCH__-static /usr/bin/
+
+RUN apk add --no-cache git python3 ca-certificates curl iputils py3-cffi tini ${PACKAGES} && \
+    apk add --no-cache --virtual=build-dependencies python3-dev build-base libffi-dev ${DEPS} && \
+    addgroup -g ${GUID} appdaemon && \
+    adduser -D -G appdaemon -s /bin/sh -u ${UID} appdaemon && \
+    pip3 install --upgrade pip && \
+    echo "${PLUGINS}" | sed "s/|/\n/g" > /tmp/requirements_plugins.txt && \
+    pip3 install --no-cache-dir --no-index --only-binary=:all: --find-links ${WHEELS_LINKS} -r /tmp/requirements_plugins.txt && \
+    pip3 install --no-cache-dir appdaemon=="${VERSION}" && \
+    apk del build-dependencies && \
+    rm -rf /tmp/* /var/tmp/* /var/cache/apk/*
+
+ENTRYPOINT ["/sbin/tini", "--"]
+EXPOSE 5050 
+
+CMD [ "appdaemon", "-c", "/conf" ]
+
