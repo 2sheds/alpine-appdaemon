@@ -5,7 +5,7 @@ LABEL Description="Appdaemon"
 ARG UID=1000
 ARG GUID=1000
 ARG DEPS=""
-ARG VERSION=__MAIN_VER__
+ARG VERSION=__PKG_VER__
 ARG PLUGINS="pysnmp|PyYAML"
 
 ENV WHEELS_LINKS=https://wheels.home-assistant.io/alpine-__ALPINE_VER__/__BUILD_ARCH__/

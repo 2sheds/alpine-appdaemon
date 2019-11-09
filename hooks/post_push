@@ -11,8 +11,8 @@ MAIN_TAG=$(echo "$DOCKER_TAG" | cut -d '-' -f 1 | grep '\.')
 if [ ! -z "$MAIN_TAG" ]; then 
   MAJMIN_VER=$(echo "$MAIN_TAG" | cut -d '.' -f 1,2 -s)
   TAGS=$(echo ", \"${MAJMIN_VER}\", \"${MAIN_TAG}\"" | sed -e 's/[]\/$*.^[]/\\&/g')
-  MAIN_VER=$(echo "$MAIN_TAG" | sed -e 's/[]\/$*.^[]/\\&/g')
-  sed -i "s/\([a-z0-9]\+\)\-latest/$MAIN_VER\-\1/g; s/\(\"latest\"\)/\1$TAGS/g; s/\:latest/\:$MAIN_VER/g" manifest.yaml
+  PKG_VER=$(echo "$MAIN_TAG" | sed -e 's/[]\/$*.^[]/\\&/g')
+  sed -i "s/\([a-z0-9]\+\)\-latest/$PKG_VER\-\1/g; s/\(\"latest\"\)/\1$TAGS/g; s/\:latest/\:$PKG_VER/g" manifest.yaml
 fi
 
 ./manifest-tool push from-spec manifest.yaml 2> /dev/null
