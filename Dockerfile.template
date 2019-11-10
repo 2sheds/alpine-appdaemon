@@ -2,14 +2,28 @@ FROM __BASEIMAGE_ARCH__/alpine:__ALPINE_VER__
 MAINTAINER Oleg Kurapov <oleg@kurapov.com>
 LABEL Description="Appdaemon"
 
+ARG BRANCH="none"
+ARG COMMIT="local-build"
+ARG VERSION="none"
+ARG BUILD_DATE="1970-01-01T00:00:00Z"
+ARG NAME="kurapov/alpine-appdaemon"
+ARG VCS_URL="https://github.com/2sheds/alpine-appdaemon"
+
 ARG UID=1000
 ARG GUID=1000
 ARG PACKAGES="py3-multidict py3-idna-ssl py3-async-timeout"
 ARG DEPS=""
-ARG VERSION=__PKG_VER__
 ARG PLUGINS="pysnmp|pyyaml==5.1|astral|pytz|requests>=2.6.0|websocket-client|Jinja2==2.10.1|voluptuous|iso8601|bcrypt|paho-mqtt"
 
 ENV WHEELS_LINKS=https://wheels.home-assistant.io/alpine-__ALPINE_VER__/__BUILD_ARCH__/
+
+LABEL \
+  org.opencontainers.image.authors="Oleg Kurapov <oleg@kurapov.com>" \
+  org.opencontainers.image.title="${NAME}" \
+  org.opencontainers.image.created="${BUILD_DATE}" \
+  org.opencontainers.image.revision="${COMMIT}" \
+  org.opencontainers.image.version="${VERSION}" \
+  org.opencontainers.image.source="${VCS_URL}"
 
 __CROSS_COPY qemu-__QEMU_ARCH__-static /usr/bin/
 
