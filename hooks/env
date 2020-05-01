@@ -1,0 +1,28 @@
+# Replicate Docker Hub environment
+: ${DOCKERFILE_PATH:?DOCKERFILE_PATH not defined} ${DOCKER_REPO:?DOCKER_REPO not defined}
+SOURCE_COMMIT="${SOURCE_COMMIT:-$(git rev-parse HEAD)}"
+SOURCE_BRANCH="${SOURCE_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
+COMMIT_MSG="${COMMIT_MSG:-$(git show -s --format=%s)}"
+DOCKERFILE_SUFFIX=$(basename "${DOCKERFILE_PATH}" | grep '\.' | cut -d '.' -f 2)
+DOCKER_ARCH=${DOCKERFILE_SUFFIX:-amd64}
+PKG_VER=$(head -n 1 requirements.txt | awk -F '==' '{print $2}')
+DOCKER_TAG="${DOCKER_TAG:-${PKG_VER}-${DOCKER_ARCH}}"
+IMAGE_NAME="${IMAGE_NAME:-${DOCKER_REPO}:${DOCKER_TAG}}"
+
+# Provide additional context
+VCS_URL="${VCS_URL:-$(git config --get remote.origin.url \
+    | perl -pe 's|^(?:git@)(\S+):(\S+)\.git$|https://\1/\2|g')}"
+REPO="${DOCKER_REPO#*/}"
+ALPINE_VER="${ALPINE_VER:-3.10}"
+PYTHON_VER="${PYTHON_VER:-3.7}"
+BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+BUILD_ENV="qemu"
+case "${DOCKER_ARCH}" in
+    arm64 ) BASEIMAGE_ARCH="arm64v8"; PKG_ARCH="aarch64"; QEMU_ARCH="aarch64" ;;
+    arm   ) BASEIMAGE_ARCH="arm32v7"; PKG_ARCH="armhf"; QEMU_ARCH="arm" ;;
+    amd64 ) BASEIMAGE_ARCH="amd64"; PKG_ARCH="amd64"; BUILD_ENV="native" ;;
+esac
+
+# Enable experimental manifest features
+export DOCKER_CLI_EXPERIMENTAL="enabled"
+DOCKER_CLI="docker run -e DOCKER_CLI_EXPERIMENTAL -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/.docker:/root/.docker --rm docker"

@@ -1,10 +1,18 @@
 #!/bin/bash
 
+. ./hooks/env
+
 docker build \
-  --build-arg VERSION=$(git describe --tags --abbrev=0 --always)  \
-  --build-arg COMMIT=$(git rev-parse HEAD) \
-  --build-arg BRANCH=$(git rev-parse --abbrev-ref HEAD) \
-  --build-arg VCS_URL=$(git config --get remote.origin.url) \
-  --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
--f $DOCKERFILE_PATH \
--t $IMAGE_NAME .
+  --build-arg VERSION="${PKG_VER}"  \
+  --build-arg COMMIT="${SOURCE_COMMIT}" \
+  --build-arg BRANCH="${SOURCE_BRANCH}" \
+  --build-arg VCS_URL="${VCS_URL}" \
+  --build-arg BUILD_DATE="${BUILD_DATE}" \
+  --build-arg ALPINE_VER="${ALPINE_VER}" \
+  --build-arg PYTHON_VER="${PYTHON_VER}" \
+  --build-arg BASEIMAGE_ARCH="${BASEIMAGE_ARCH}" \
+  --build-arg PKG_ARCH="${PKG_ARCH}" \
+  --build-arg QEMU_ARCH="${QEMU_ARCH}" \
+-f "${DOCKERFILE_PATH}" \
+-t "${IMAGE_NAME}" . \
+| while read line ; do echo "$(date)| $line"; done;

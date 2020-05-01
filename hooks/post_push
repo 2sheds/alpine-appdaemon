@@ -1,39 +1,41 @@
-#!/bin/bash
+#!/bin/bash -xe
 
-# Use manifest-tool to create the manifest, given the experimental
-# "docker manifest" command isn't available yet on Docker Hub.
+. ./hooks/env
 
-curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
-chmod +x manifest-tool
+TAG_PREFIX=${DOCKER_TAG%-*}
+IMAGE_PREFIX="${IMAGE_NAME%-*}"
+ARCH_LIST="amd64 $(ls -1 Dockerfile.* | sed 's|Dockerfile.||')"
+IMAGE_LIST=""
+for i in ${ARCH_LIST}; do
+  IMAGE_LIST="${IMAGE_LIST}${IMAGE_PREFIX}-${i} "
+done
 
-MAIN_TAG=$(echo "$DOCKER_TAG" | cut -d '-' -f 1 | grep '\.')
+: ${PA_TOKEN:?PA_TOKEN not configured} ${PA_USER:?PA_USER not configured}
+${DOCKER_CLI} login -u "${PA_USER}" -p "${PA_TOKEN}" >/dev/null 2>&1
 
-if [ ! -z "$MAIN_TAG" ]; then 
-  MAJMIN_VER=$(echo "$MAIN_TAG" | cut -d '.' -f 1,2 -s)
-  TAGS=$(echo ", \"${MAJMIN_VER}\", \"${MAIN_TAG}\"" | sed -e 's/[]\/$*.^[]/\\&/g')
-  PKG_VER=$(echo "$MAIN_TAG" | sed -e 's/[]\/$*.^[]/\\&/g')
-  sed -i "s/\([a-z0-9]\+\)\-latest/$PKG_VER\-\1/g; s/\(\"latest\"\)/\1$TAGS/g; s/\:latest/\:$PKG_VER/g" manifest.yaml
+function manifest_annotate {
+  ${DOCKER_CLI} manifest annotate $1 ${IMAGE_PREFIX}-arm --os linux --arch "arm" --variant "7"
+  ${DOCKER_CLI} manifest annotate $1 ${IMAGE_PREFIX}-arm64 --os linux --arch "arm64" --variant "8"
+}
+
+${DOCKER_CLI} manifest create --amend ${IMAGE_PREFIX} ${IMAGE_LIST} || exit 0
+manifest_annotate "${IMAGE_PREFIX}"
+${DOCKER_CLI} manifest push -p "${IMAGE_PREFIX}"
+if [ "${TAG_PREFIX}" != "latest" ]; then
+  ${DOCKER_CLI} manifest create --amend "${IMAGE_PREFIX%.*}" ${IMAGE_LIST}
+  manifest_annotate "${IMAGE_PREFIX%.*}"
+  ${DOCKER_CLI} manifest push -p "${IMAGE_PREFIX%.*}"
+  ${DOCKER_CLI} manifest create --amend "${DOCKER_REPO}:latest" ${IMAGE_LIST}
+  manifest_annotate "${DOCKER_REPO}:latest"
+  ${DOCKER_CLI} manifest push -p "${DOCKER_REPO}:latest"
 fi
 
-./manifest-tool push from-spec manifest.yaml 2> /dev/null
-if [ $? -eq 0 ]; then
-  if [ -z "$MAIN_TAG" ]; then
-    echo "No cleanup for 'latest' tags"
-    exit 0
-  fi
-  if [ -z "$PA_TOKEN" ] || [ -z "$PA_USER" ]; then
-    echo "Both PA_USER and PA_TOKEN envvars have to be configured"
-    exit 0
-  fi
-  REPO=$(echo $DOCKER_REPO | cut -d "/" -f 2,3)
-  TOKEN=$(curl -s -H "Content-Type: application/json" \
-    -X POST -d '{"username": "'$PA_USER'", "password": "'$PA_TOKEN'"}' \
-	https://hub.docker.com/v2/users/login/ | python -c "import sys, json; print json.load(sys.stdin)['token']")
-  for i in "amd64" "arm64" "armhf"; do
-    curl -s "https://hub.docker.com/v2/repositories/${REPO}/tags/${MAIN_TAG}-${i}/" -X DELETE -H "Authorization: JWT ${TOKEN}"
-  done
-  echo "All images pushed successfully, cleaning up tags."
-else
-  echo "Manifest images not complete, continuing."
-  ./manifest-tool push from-spec --ignore-missing manifest.yaml
-fi
+echo "All images pushed successfully, cleaning up tags."
+# Obtain JWT for authorization
+JW_TOKEN=$(curl -s -H "Content-Type: application/json" \
+  -X POST -d "{\"username\": \"$PA_USER\", \"password\": \"$PA_TOKEN\"}" \
+  https://hub.docker.com/v2/users/login/ | python -c "import sys, json; print json.load(sys.stdin)['token']")
+# Clean up tags
+for i in ${ARCH_LIST}; do
+  curl -s -H "Authorization: JWT ${JW_TOKEN}" -X DELETE "https://hub.docker.com/v2/repositories/${REPO}/tags/${TAG_PREFIX}-${i}/"
+done
