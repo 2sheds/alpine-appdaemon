@@ -2,6 +2,8 @@ ARG ALPINE_VER="3.10"
 ARG PYTHON_VER="3.7"
 ARG BASEIMAGE_ARCH="amd64"
 
+FROM kurapov/alpine-jemalloc:latest-${BASEIMAGE_ARCH} AS jemalloc
+
 FROM ${BASEIMAGE_ARCH}/python:${PYTHON_VER}-alpine${ALPINE_VER}
 
 ARG ALPINE_VER
@@ -42,14 +44,16 @@ RUN apk add --update-cache curl iputils tini ${PACKAGES} && \
     addgroup -g ${GUID} appdaemon && \
     adduser -D -G appdaemon -s /bin/sh -u ${UID} appdaemon && \
     pip3 install --upgrade pip && \
-    egrep -e "${PLUGINS}" /tmp/requirements.txt > /tmp/requirements_plugins.txt && \
-    egrep -v -e "${PLUGINS}" /tmp/requirements.txt > /tmp/requirements_wheels.txt && \
-	#pip3 install --no-cache-dir --no-index --only-binary=:all: --find-links ${WHEELS_LINKS} -r /tmp/requirements_wheels.txt && \
-    pip3 install --no-cache-dir --prefer-binary -r /tmp/requirements.txt appdaemon=="${VERSION}" && \
+    pip3 install --no-cache-dir --prefer-binary --find-links ${WHEELS_LINKS} -r /tmp/requirements.txt appdaemon=="${VERSION}" && \
     apk del build-dependencies && \
     rm -rf /tmp/* /var/tmp/* /var/cache/apk/*
 
+COPY --from=jemalloc /usr/local/lib/libjemalloc.so* /usr/local/lib/
+
+ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so.2
+
 ENTRYPOINT ["/sbin/tini", "--"]
+
 EXPOSE 5050 
 
 CMD [ "appdaemon", "-c", "/conf" ]
