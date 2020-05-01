@@ -37,8 +37,8 @@ LABEL \
 
 ADD "https://raw.githubusercontent.com/home-assistant/appdaemon/${VERSION}/requirements.txt" /tmp
 
-RUN apk add --no-cache curl iputils tini ${PACKAGES} && \
-    apk add --no-cache --virtual=build-dependencies build-base libffi-dev ${DEPS} && \
+RUN apk add --update-cache curl iputils tini ${PACKAGES} && \
+    apk add --virtual=build-dependencies build-base libffi-dev ${DEPS} && \
     addgroup -g ${GUID} appdaemon && \
     adduser -D -G appdaemon -s /bin/sh -u ${UID} appdaemon && \
     pip3 install --upgrade pip && \
