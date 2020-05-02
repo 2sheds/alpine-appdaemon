@@ -1,8 +1,9 @@
 ARG ALPINE_VER="3.10"
 ARG PYTHON_VER="3.7"
 ARG BASEIMAGE_ARCH="amd64"
+ARG DOCKER_ARCH="amd64"
 
-FROM kurapov/alpine-jemalloc:latest-${BASEIMAGE_ARCH} AS jemalloc
+FROM kurapov/alpine-jemalloc:latest-${DOCKER_ARCH} AS jemalloc
 
 FROM ${BASEIMAGE_ARCH}/python:${PYTHON_VER}-alpine${ALPINE_VER}
 

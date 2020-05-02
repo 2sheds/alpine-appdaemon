@@ -10,6 +10,7 @@ docker build \
   --build-arg BUILD_DATE="${BUILD_DATE}" \
   --build-arg ALPINE_VER="${ALPINE_VER}" \
   --build-arg PYTHON_VER="${PYTHON_VER}" \
+  --build-arg DOCKER_ARCH="${DOCKER_ARCH}" \
   --build-arg BASEIMAGE_ARCH="${BASEIMAGE_ARCH}" \
   --build-arg PKG_ARCH="${PKG_ARCH}" \
   --build-arg QEMU_ARCH="${QEMU_ARCH}" \
