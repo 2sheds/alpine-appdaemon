@@ -14,5 +14,6 @@ docker build \
   --build-arg PKG_ARCH="${PKG_ARCH}" \
   --build-arg QEMU_ARCH="${QEMU_ARCH}" \
 -f "${DOCKERFILE_PATH}" \
+-t "${DOCKER_REPO}:latest-${DOCKER_ARCH}" \
 -t "${IMAGE_NAME}" . \
 | while read line ; do echo "$(date)| $line"; done;
