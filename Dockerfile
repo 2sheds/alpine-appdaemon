@@ -39,7 +39,7 @@ LABEL \
 
 ADD "https://raw.githubusercontent.com/home-assistant/appdaemon/${VERSION}/requirements.txt" /tmp
 
-RUN apk add --update-cache curl iputils tini ${PACKAGES} && \
+RUN apk add --update-cache curl iputils ${PACKAGES} && \
     apk add --virtual=build-dependencies build-base libffi-dev ${DEPS} && \
     addgroup -g ${GUID} appdaemon && \
     adduser -D -G appdaemon -s /bin/sh -u ${UID} appdaemon && \
@@ -51,8 +51,6 @@ RUN apk add --update-cache curl iputils tini ${PACKAGES} && \
 COPY --from=jemalloc /usr/local/lib/libjemalloc.so* /usr/local/lib/
 
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so.2
-
-ENTRYPOINT ["/sbin/tini", "--"]
 
 EXPOSE 5050 
 
