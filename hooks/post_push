@@ -2,6 +2,11 @@
 
 . ./hooks/env
 
+# Push latest-[arch] tag if it's not created 
+if [ "${TAG_PREFIX}" != "latest" ]; then
+  docker push ${DOCKER_REPO}:latest-${DOCKER_ARCH}
+fi
+
 ARCH_LIST="amd64 $(ls -1 Dockerfile.* | sed 's|Dockerfile.||')"
 IMAGE_LIST=""
 for i in ${ARCH_LIST}; do
