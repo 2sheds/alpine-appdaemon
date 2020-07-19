@@ -1,9 +1,0 @@
-#!/bin/bash
-
-. ./hooks/env
-if [ "${BUILD_ENV}" == "native" ]; then
-  echo 'qemu-user-static: Registration not required for current arch'
-  exit 0
-fi
-
-docker run --rm --privileged multiarch/qemu-user-static:register --reset
